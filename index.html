@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earn Points - Telegram Mini App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --success-color: #4caf50;
+            --warning-color: #ff9800;
+            --danger-color: #f44336;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --gray-color: #6c757d;
+            --border-radius: 10px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark-color);
+            line-height: 1.6;
+            padding-bottom: 70px; /* Space for footer nav */
+        }
+
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .app-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .user-points {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .app-main {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--gray-color);
+        }
+
+        .checkin-bonus {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+        }
+
+        .bonus-day {
+            text-align: center;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            background-color: var(--light-color);
+            flex: 1;
+            margin: 0 3px;
+        }
+
+        .bonus-day.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .day-label {
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+
+        .bonus-points {
+            font-weight: 700;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn:disabled {
+            background-color: var(--gray-color);
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background-color: var(--gray-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .ads-progress {
+            margin: 15px 0;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background-color: var(--light-color);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--accent-color);
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+        .referral-link-container {
+            display: flex;
+            margin-top: 15px;
+        }
+
+        .referral-link {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius) 0 0 var(--border-radius);
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+
+        .app-footer {
+            background-color: var(--light-color);
+            padding: 15px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--gray-color);
+            border-top: 1px solid #eee;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            color: white;
+            font-weight: 600;
+            box-shadow: var(--box-shadow);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .notification.success {
+            background-color: var(--success-color);
+        }
+
+        .notification.error {
+            background-color: var(--danger-color);
+        }
+
+        .notification.info {
+            background-color: var(--accent-color);
+        }
+
+        .ad-loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .ad-loading-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary-color);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Footer Navigation */
+        .footer-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-color);
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: color 0.3s;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .nav-item i {
+            font-size: 1.2rem;
+            margin-bottom: 4px;
+        }
+
+        /* Sponsor Ad Section */
+        .sponsor-ad {
+            background-color: #f0f8ff;
+            border: 1px solid #b3d9ff;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .sponsor-ad::before {
+            content: "SPONSOR";
+            position: absolute;
+            top: -10px;
+            left: 15px;
+            background-color: var(--warning-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .sponsor-ad h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .sponsor-ad a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            padding: 8px 15px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--primary-color);
+            transition: all 0.3s;
+        }
+
+        .sponsor-ad a:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .app-container {
+                max-width: 100%;
+            }
+            
+            .stats {
+                flex-wrap: wrap;
+            }
+            
+            .stat-item {
+                flex: 1 0 50%;
+                margin-bottom: 10px;
+            }
+            
+            .checkin-bonus {
+                flex-wrap: wrap;
+            }
+            
+            .bonus-day {
+                flex: 1 0 30%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+    
+    <!-- Updated Monetag SDK -->
+    <script src='//libtl.com/sdk.js' data-zone='9662488' data-sdk='show_9662488'></script>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1><i class="fas fa-coins"></i> Earn Points</h1>
+            <div class="user-points">
+                <i class="fas fa-star"></i> <span id="user-points">0</span> Points
+            </div>
+        </header>
+        
+        <main class="app-main">
+            <!-- Dashboard Section -->
+            <section class="dashboard-section">
+                <div class="card">
+                    <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="checkin-streak">0</div>
+                            <div class="stat-label">Check-in Streak</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="ads-watched">0</div>
+                            <div class="stat-label">Ads Today</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="referrals-count">0</div>
+                            <div class="stat-label">Referrals</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Check-in Section -->
+            <section class="checkin-section">
+                <div class="card">
+                    <h2><i class="fas fa-calendar-check"></i> Daily Check-in</h2>
+                    <div class="checkin-bonus">
+                        <div class="bonus-day day-1">
+                            <div class="day-label">Day 1</div>
+                            <div class="bonus-points">10 pts</div>
+                        </div>
+                        <div class="bonus-day day-2">
+                            <div class="day-label">Day 2</div>
+                            <div class="bonus-points">29 pts</div>
+                        </div>
+                        <div class="bonus-day day-3">
+                            <div class="day-label">Day 3</div>
+                            <div class="bonus-points">38 pts</div>
+                        </div>
+                        <div class="bonus-day day-4">
+                            <div class="day-label">Day 4</div>
+                            <div class="bonus-points">45 pts</div>
+                        </div>
+                        <div class="bonus-day day-5">
+                            <div class="day-label">Day 5</div>
+                            <div class="bonus-points">55 pts</div>
+                        </div>
+                    </div>
+                    <button id="checkin-btn" class="btn btn-primary">
+                        <i class="fas fa-gift"></i> Check In Now
+                    </button>
+                </div>
+            </section>
+            
+            <!-- Watch Ads Section -->
+            <section class="ads-section">
+                <div class="card">
+                    <h2><i class="fas fa-ad"></i> Watch & Earn</h2>
+                    <p>Watch an ad and earn 20 points</p>
+                    <div class="ads-progress">
+                        <div class="progress-info">
+                            <span id="ads-count">0/100</span> ads today
+                        </div>
+                        <div class="progress-bar">
+                            <div id="ads-progress" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <button id="watch-ad-btn" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Watch Ad Now
+                    </button>
+                </div>
+            </section>
+            
+            <!-- Referral Section -->
+            <section class="referral-section">
+                <div class="card">
+                    <h2><i class="fas fa-user-friends"></i> Referral Program</h2>
+                    <p>Invite friends and earn bonus points</p>
+                    <div class="referral-link-container">
+                        <input type="text" id="referral-link" class="referral-link" readonly value="https://t.me/clickadsapp_bot?start=ABC123">
+                        <button id="copy-referral-btn" class="btn btn-secondary">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Sponsor Ad Section -->
+            <section class="sponsor-ad-section">
+                <div class="sponsor-ad">
+                    <h3>Buy Flash USDT Here</h3>
+                    <a href="https://www.hhminer.online" target="_blank">Visit Now</a>
+                </div>
+            </section>
+            
+            <!-- Withdraw Section -->
+            <section class="withdraw-section">
+                <div class="card">
+                    <h2><i class="fas fa-money-bill-wave"></i> Withdraw Points</h2>
+                    <p>Minimum withdrawal: 5000 points ($2.00 USD)</p>
+                    <form id="withdraw-form">
+                        <div class="form-group">
+                            <label for="withdraw-method">Withdrawal Method</label>
+                            <select id="withdraw-method" class="form-control">
+                                <option value="paypal">PayPal</option>
+                                <option value="usdt">USDT (TRC20)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="withdraw-address">Address</label>
+                            <input type="text" id="withdraw-address" class="form-control" placeholder="Enter your PayPal email or USDT address">
+                        </div>
+                        <div class="form-group">
+                            <label for="withdraw-amount">Points to Withdraw</label>
+                            <input type="number" id="withdraw-amount" class="form-control" min="5000" step="100" placeholder="Minimum 5000 points">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Withdraw Now
+                        </button>
+                    </form>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="app-footer">
+            <p>&copy; 2025 Earn Points Mini App. All rights reserved.</p>
+        </footer>
+    </div>
+    
+    <!-- Footer Navigation -->
+    <nav class="footer-nav">
+        <a href="#" class="nav-item active" data-section="dashboard">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="#" class="nav-item" data-section="withdraw">
+            <i class="fas fa-money-bill-wave"></i>
+            <span>Withdraw</span>
+        </a>
+        <a href="#" class="nav-item" data-section="referral">
+            <i class="fas fa-user-friends"></i>
+            <span>Ref</span>
+        </a>
+        <a href="#" class="nav-item" data-section="support">
+            <i class="fas fa-headset"></i>
+            <span>Support</span>
+        </a>
+    </nav>
+    
+    <!-- Notification Container -->
+    <div id="notification" class="notification"></div>
+    
+    <!-- Ad Loading Modal -->
+    <div id="ad-loading" class="ad-loading">
+        <div class="ad-loading-content">
+            <div class="spinner"></div>
+            <h3>Loading Ad...</h3>
+            <p>Please wait while we prepare an ad for you</p>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mock user data
+            let userData = {
+                points: 1250,
+                checkinStreak: 3,
+                adsWatchedToday: 42,
+                referralsCount: 5,
+                lastCheckin: null,
+                dailyAdLimit: 100
+            };
+            
+            // DOM Elements
+            const userPointsEl = document.getElementById('user-points');
+            const checkinStreakEl = document.getElementById('checkin-streak');
+            const adsWatchedEl = document.getElementById('ads-watched');
+            const referralsCountEl = document.getElementById('referrals-count');
+            const adsCountEl = document.getElementById('ads-count');
+            const adsProgressEl = document.getElementById('ads-progress');
+            const referralLinkEl = document.getElementById('referral-link');
+            const checkinBtn = document.getElementById('checkin-btn');
+            const watchAdBtn = document.getElementById('watch-ad-btn');
+            const copyReferralBtn = document.getElementById('copy-referral-btn');
+            const withdrawForm = document.getElementById('withdraw-form');
+            const notificationEl = document.getElementById('notification');
+            const adLoadingEl = document.getElementById('ad-loading');
+            
+            // Navigation items
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            // Initialize UI
+            function updateUI() {
+                userPointsEl.textContent = userData.points;
+                checkinStreakEl.textContent = userData.checkinStreak;
+                adsWatchedEl.textContent = userData.adsWatchedToday;
+                referralsCountEl.textContent = userData.referralsCount;
+                
+                // Update ads progress
+                const adsPercentage = (userData.adsWatchedToday / userData.dailyAdLimit) * 100;
+                adsProgressEl.style.width = `${adsPercentage}%`;
+                adsCountEl.textContent = `${userData.adsWatchedToday}/${userData.dailyAdLimit}`;
+                
+                // Update check-in button state
+                const today = new Date().toDateString();
+                if (userData.lastCheckin === today) {
+                    checkinBtn.disabled = true;
+                    checkinBtn.innerHTML = '<i class="fas fa-check"></i> Already Checked In';
+                }
+                
+                // Update watch ad button state
+                if (userData.adsWatchedToday >= userData.dailyAdLimit) {
+                    watchAdBtn.disabled = true;
+                    watchAdBtn.innerHTML = '<i class="fas fa-ban"></i> Daily Limit Reached';
+                }
+                
+                // Update check-in bonus display
+                updateCheckinBonus();
+            }
+            
+            // Update check-in bonus display
+            function updateCheckinBonus() {
+                const bonusDays = document.querySelectorAll('.bonus-day');
+                bonusDays.forEach((day, index) => {
+                    if (index < userData.checkinStreak) {
+                        day.classList.add('active');
+                    } else {
+                        day.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Show notification
+            function showNotification(message, type = 'info') {
+                notificationEl.textContent = message;
+                notificationEl.className = `notification ${type}`;
+                notificationEl.classList.add('show');
+                
+                setTimeout(() => {
+                    notificationEl.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Handle navigation
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Update active nav item
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Get target section
+                    const sectionName = this.getAttribute('data-section');
+                    let targetSection;
+                    
+                    switch(sectionName) {
+                        case 'dashboard':
+                            targetSection = document.querySelector('.dashboard-section');
+                            break;
+                        case 'withdraw':
+                            targetSection = document.querySelector('.withdraw-section');
+                            break;
+                        case 'referral':
+                            targetSection = document.querySelector('.referral-section');
+                            break;
+                        case 'support':
+                            showNotification('Support feature coming soon!', 'info');
+                            return;
+                    }
+                    
+                    // Scroll to section
+                    if (targetSection) {
+                        targetSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+            
+            // Handle check-in
+            checkinBtn.addEventListener('click', function() {
+                const today = new Date().toDateString();
+                
+                if (userData.lastCheckin === today) {
+                    showNotification('You have already checked in today!', 'error');
+                    return;
+                }
+                
+                // Calculate streak
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (userData.lastCheckin === yesterday.toDateString()) {
+                    userData.checkinStreak++;
+                } else {
+                    userData.checkinStreak = 1;
+                }
+                
+                // Determine points based on streak
+                let points = 0;
+                switch (userData.checkinStreak) {
+                    case 1:
+                        points = 10;
+                        break;
+                    case 2:
+                        points = 29;
+                        break;
+                    case 3:
+                        points = 38;
+                        break;
+                    case 4:
+                        points = 45;
+                        break;
+                    case 5:
+                        points = 55;
+                        break;
+                    default:
+                        points = 55;
+                        break;
+                }
+                
+                userData.points += points;
+                userData.lastCheckin = today;
+                
+                updateUI();
+                showNotification(`You earned ${points} points!`, 'success');
+            });
+            
+            // Handle watch ad - Updated with Monetag SDK
+            watchAdBtn.addEventListener('click', function() {
+                if (userData.adsWatchedToday >= userData.dailyAdLimit) {
+                    showNotification('Daily ad limit reached!', 'error');
+                    return;
+                }
+                
+                // Show loading modal
+                adLoadingEl.style.display = 'flex';
+                
+                // Call Monetag rewarded interstitial ad
+                show_9662488().then(() => {
+                    // Hide loading modal
+                    adLoadingEl.style.display = 'none';
+                    
+                    // Award points after ad is watched
+                    userData.points += 20;
+                    userData.adsWatchedToday++;
+                    
+                    updateUI();
+                    showNotification('You earned 20 points!', 'success');
+                }).catch(error => {
+                    // Hide loading modal
+                    adLoadingEl.style.display = 'none';
+                    
+                    // Show error message
+                    console.error('Ad error:', error);
+                    showNotification('Failed to load ad. Please try again later.', 'error');
+                });
+            });
+            
+            // Handle copy referral link
+            copyReferralBtn.addEventListener('click', function() {
+                referralLinkEl.select();
+                document.execCommand('copy');
+                
+                // Visual feedback
+                const originalText = copyReferralBtn.innerHTML;
+                copyReferralBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                
+                setTimeout(() => {
+                    copyReferralBtn.innerHTML = originalText;
+                }, 2000);
+                
+                showNotification('Referral link copied to clipboard!', 'success');
+            });
+            
+            // Handle withdrawal form
+            withdrawForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const method = document.getElementById('withdraw-method').value;
+                const address = document.getElementById('withdraw-address').value;
+                const amount = parseInt(document.getElementById('withdraw-amount').value);
+                
+                if (!address || !amount) {
+                    showNotification('Please fill in all fields', 'error');
+                    return;
+                }
+                
+                if (amount < 5000) {
+                    showNotification('Minimum withdrawal is 5000 points', 'error');
+                    return;
+                }
+                
+                if (amount > userData.points) {
+                    showNotification('Insufficient points', 'error');
+                    return;
+                }
+                
+                // Calculate USD amount
+                const usdAmount = (amount * 0.0004).toFixed(2);
+                
+                // Deduct points
+                userData.points -= amount;
+                
+                updateUI();
+                showNotification(`Withdrawal request for $${usdAmount} submitted successfully!`, 'success');
+                
+                // Reset form
+                withdrawForm.reset();
+            });
+            
+            // Initialize UI
+            updateUI();
+        });
+    </script>
+</body>
+</html>

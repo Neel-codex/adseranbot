@@ -1,178 +1,321 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Crypto Signals • Ultra Minimal</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Crypto Signals • Multi-API Real-Time</title>
   <style>
     :root {
       --bg: #0a0e17;
       --card: #111827;
-      --text: #d1d5db;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
       --green: #10b981;
       --red: #ef4444;
+      --blue: #3b82f6;
+      --orange: #f59e0b;
     }
+
+    * { box-sizing: border-box; }
     body {
-      font-family: system-ui, sans-serif;
       margin: 0;
-      padding: 12px;
+      font-family: system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
-      font-size: 0.95rem;
+      font-size: 0.94rem;
+      line-height: 1.4;
     }
+
     header {
-      text-align: center;
-      padding: 12px;
+      padding: 14px 16px;
       background: var(--card);
-      border-radius: 8px;
-      margin-bottom: 12px;
+      text-align: center;
+      border-bottom: 1px solid #1f2937;
     }
+
     h1 {
       margin: 0;
-      font-size: 1.3rem;
+      font-size: 1.38rem;
       font-weight: 600;
+      letter-spacing: -0.4px;
     }
+
+    #status {
+      margin-top: 6px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
     .controls {
       display: flex;
       gap: 10px;
+      padding: 12px 16px;
+      flex-wrap: wrap;
       justify-content: center;
-      margin: 12px 0;
+      background: var(--card);
+      border-bottom: 1px solid #1f2937;
     }
+
     input, button {
-      padding: 8px 12px;
+      padding: 9px 14px;
       border-radius: 6px;
+      font-size: 0.9rem;
       background: #1f2937;
       border: 1px solid #374151;
       color: white;
-      font-size: 0.9rem;
     }
+
     button {
-      background: #3b82f6;
+      background: var(--blue);
       border: none;
       cursor: pointer;
+      font-weight: 500;
     }
-    button:hover { opacity: 0.9; }
+
+    button:hover { opacity: 0.92; }
+
+    .table-container {
+      padding: 0 12px 24px;
+      overflow-x: auto;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
       background: var(--card);
-      border-radius: 8px;
+      border-radius: 10px;
       overflow: hidden;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
     }
+
     th, td {
-      padding: 8px 10px;
-      text-align: center;
-      border-bottom: 1px solid #374151;
+      padding: 10px 12px;
+      text-align: right;
+      border-bottom: 1px solid #1f2937;
     }
+
     th {
-      background: #111827;
+      background: #0f172a;
       font-weight: 500;
-      color: #9ca3af;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-size: 0.76rem;
+      letter-spacing: 0.4px;
     }
+
+    td:first-child {
+      text-align: left;
+      font-weight: 500;
+    }
+
     tr:hover {
-      background: rgba(59,130,246,0.08);
+      background: rgba(59, 130, 246, 0.07);
     }
-    .strong-buy { background: rgba(16,185,129,0.15); color: var(--green); font-weight: bold; }
-    .buy       { color: var(--green); font-weight: bold; }
-    .sell      { color: var(--red);   font-weight: bold; }
-    .strong-sell { background: rgba(239,68,68,0.15); color: var(--red); font-weight: bold; }
-    .neutral   { color: #9ca3af; }
+
+    .coin-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .coin-cell img {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #1f2937;
+    }
+
+    .strong-buy { background: rgba(16,185,129,0.11); color: var(--green); font-weight: 600; }
+    .buy       { color: var(--green); font-weight: 600; }
+    .sell      { color: var(--red);   font-weight: 600; }
+    .strong-sell { background: rgba(239,68,68,0.11); color: var(--red); font-weight: 600; }
+
+    .rr-good   { color: #6ee7b7; }
+    .rr-excellent { color: #34d399; font-weight: 600; }
+    .rr-warning { color: #fbbf24; }
+
+    .tf-short  { color: #a5b4fc; }
+    .tf-swing  { color: #c084fc; }
+
+    @media (max-width: 768px) {
+      .controls { flex-direction: column; align-items: stretch; }
+      th, td { padding: 9px 8px; font-size: 0.82rem; }
+    }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>Crypto Signals</h1>
-  <div id="status" style="color:#9ca3af; font-size:0.85rem;">Loading...</div>
+  <h1>Crypto Signals • Real-Time</h1>
+  <div id="status">Loading from multiple free APIs...</div>
 </header>
 
 <div class="controls">
-  <input type="text" id="search" placeholder="Search...">
-  <button id="refresh">↻</button>
+  <input type="text" id="search" placeholder="Search coin or symbol…">
+  <button id="refresh">↻ Refresh Now</button>
 </div>
 
-<table id="table">
-  <thead>
-    <tr>
-      <th>Coin</th>
-      <th>Price</th>
-      <th>24h</th>
-      <th>Signal</th>
-      <th>Entry / TP / SL</th>
-    </tr>
-  </thead>
-  <tbody id="tbody"></tbody>
-</table>
+<div class="table-container">
+  <table id="table">
+    <thead>
+      <tr>
+        <th>Coin</th>
+        <th>Price</th>
+        <th>24h</th>
+        <th>Vol/MCap</th>
+        <th>Signal</th>
+        <th>Entry</th>
+        <th>TP1</th>
+        <th>TP2</th>
+        <th>SL</th>
+        <th>R:R</th>
+        <th>Timeframe</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
 
 <script>
-const COINGECKO = 'https://api.coingecko.com/api/v3';
+const APIs = [
+  { name: 'CoinGecko', url: 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h' },
+  { name: 'CoinCap',   url: 'https://api.coincap.io/v2/assets?limit=100' },
+  { name: 'CoinPaprika', url: 'https://api.coinpaprika.com/v1/tickers?quotes=USD' }
+];
+
+const REFRESH_SEC = 60; // more real-time feel with free limits
+
+async function fetchWithFallback() {
+  for (const api of APIs) {
+    try {
+      const res = await fetch(api.url, { cache: 'no-cache' });
+      if (!res.ok) continue;
+      const data = await res.json();
+      if (api.name === 'CoinGecko') return { source: api.name, coins: data };
+      if (api.name === 'CoinCap') {
+        return { source: api.name, coins: data.data.map(a => ({
+          id: a.id,
+          symbol: a.symbol,
+          name: a.name,
+          image: `https://assets.coincap.io/assets/icons/${a.symbol.toLowerCase()}@2x.png`,
+          current_price: parseFloat(a.priceUsd),
+          price_change_percentage_24h: parseFloat(a.changePercent24Hr),
+          total_volume: parseFloat(a.volumeUsd24Hr),
+          market_cap: parseFloat(a.marketCapUsd)
+        })) };
+      }
+      if (api.name === 'CoinPaprika') {
+        return { source: api.name, coins: Object.values(data).map(t => ({
+          id: t.id,
+          symbol: t.symbol,
+          name: t.name,
+          image: `https://coinpaprika.com/coin/${t.id}/logo.png`, // approx
+          current_price: t.quotes.USD.price,
+          price_change_percentage_24h: t.quotes.USD.percent_change_24h,
+          total_volume: t.quotes.USD.volume_24h,
+          market_cap: t.quotes.USD.market_cap
+        })) };
+      }
+    } catch (e) {}
+  }
+  throw new Error('All free APIs failed');
+}
 
 async function loadData() {
   const status = document.getElementById('status');
-  status.textContent = 'Loading real-time data...';
+  status.textContent = `Fetching (${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'})})…`;
 
   try {
-    const res = await fetch(
-      `${COINGECKO}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false&price_change_percentage=24h`
-    );
-    const coins = await res.json();
+    const { source, coins } = await fetchWithFallback();
+    status.textContent = `From ${source} • ${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})} • every ${REFRESH_SEC}s`;
 
     const tbody = document.getElementById('tbody');
     tbody.innerHTML = '';
 
     coins.forEach(c => {
-      const ch24 = c.price_change_percentage_24h || 0;
-      const volRatio = c.market_cap > 0 ? c.total_volume / c.market_cap : 0;
+      const price    = c.current_price || 0;
+      const ch24     = c.price_change_percentage_24h || 0;
+      const volume   = c.total_volume || 0;
+      const mcap     = c.market_cap || 1;
+      const volRatio = mcap > 0 ? volume / mcap : 0;
 
-      let signal = 'NEUTRAL', cls = 'neutral';
+      let signal = 'NEUTRAL';
+      let cls = '';
+      let timeframe = '';
+      let tfClass = '';
 
-      if (ch24 > 8 && volRatio > 2.5) {
+      if (ch24 > 9.5 && volRatio > 3.2) {
         signal = 'STRONG BUY'; cls = 'strong-buy';
-      } else if (ch24 > 4) {
+        timeframe = 'Short / Swing'; tfClass = 'tf-swing';
+      } else if (ch24 > 4.8 && volRatio > 1.7) {
         signal = 'BUY'; cls = 'buy';
-      } else if (ch24 < -8 && volRatio > 2.5) {
+        timeframe = 'Short-term'; tfClass = 'tf-short';
+      } else if (ch24 < -9.5 && volRatio > 3.2) {
         signal = 'STRONG SELL'; cls = 'strong-sell';
-      } else if (ch24 < -4) {
+        timeframe = 'Short / Swing'; tfClass = 'tf-swing';
+      } else if (ch24 < -4.8 && volRatio > 1.7) {
         signal = 'SELL'; cls = 'sell';
+        timeframe = 'Short-term'; tfClass = 'tf-short';
       }
 
-      const entry = c.current_price;
-      const tp = (entry * 1.15).toFixed(4); // 15% TP
-      const sl = (entry * 0.93).toFixed(4); // 7% SL
+      if (signal === 'NEUTRAL') return;
+
+      const entry = price;
+      const tp1   = entry * 1.068;
+      const tp2   = entry * 1.152;
+      const sl    = entry * 0.956;
+
+      const risk   = entry - sl;
+      const reward = tp2 - entry;
+      const rr     = reward / risk;
+
+      let rrText = rr.toFixed(1);
+      let rrClass = 'rr-good';
+      if (rr >= 3.2) rrClass = 'rr-excellent';
+      else if (rr < 1.8) rrClass = 'rr-warning';
 
       const tr = document.createElement('tr');
+      tr.className = cls;
       tr.innerHTML = `
-        <td style="text-align:left">
-          <img src="${c.image}" width="20" height="20" style="vertical-align:middle; margin-right:6px; border-radius:50%;">
-          ${c.name} (${c.symbol.toUpperCase()})
+        <td class="coin-cell">
+          <img src="${c.image || 'https://via.placeholder.com/22'}" alt loading="lazy" onerror="this.src='https://via.placeholder.com/22'">
+          <div>
+            ${c.name}<br>
+            <small style="color:var(--muted);">${c.symbol.toUpperCase()}</small>
+          </div>
         </td>
-        <td>$${entry.toLocaleString(undefined,{minimumFractionDigits:2,maxFractionDigits:6})}</td>
+        <td>$${price.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:6})}</td>
         <td>${ch24.toFixed(2)}%</td>
+        <td>${(volRatio).toFixed(2)}×</td>
         <td class="${cls}">${signal}</td>
-        <td>$${entry.toFixed(4)} → $${tp} / $${sl}</td>
+        <td>$${entry.toFixed(6)}</td>
+        <td class="rr-good">$${tp1.toFixed(6)}</td>
+        <td class="rr-excellent">$${tp2.toFixed(6)}</td>
+        <td style="color:var(--red);">$${sl.toFixed(6)}</td>
+        <td class="${rrClass}">${rrText}:1</td>
+        <td class="${tfClass}">${timeframe}</td>
       `;
       tbody.appendChild(tr);
     });
 
-    status.textContent = `Updated: ${new Date().toLocaleTimeString()}`;
   } catch (err) {
-    status.textContent = 'Error loading data';
+    console.error(err);
+    status.textContent = 'All free sources failed – try again later';
   }
 }
 
-document.getElementById('refresh').onclick = loadData;
-document.getElementById('search').oninput = function() {
-  const term = this.value.trim().toLowerCase();
-  const rows = document.querySelectorAll('#tbody tr');
-  rows.forEach(row => {
-    const text = row.textContent.toLowerCase();
-    row.style.display = text.includes(term) ? '' : 'none';
+// Search filter
+document.getElementById('search').oninput = e => {
+  const term = e.target.value.trim().toLowerCase();
+  document.querySelectorAll('#tbody tr').forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
   });
 };
 
+document.getElementById('refresh').onclick = loadData;
+
 window.onload = loadData;
-setInterval(loadData, 900000); // 15 min
+setInterval(loadData, REFRESH_SEC * 1000);
 </script>
 </body>
 </html>

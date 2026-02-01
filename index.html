@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Crypto Signals • Multi-API Real-Time</title>
+  <title>Crypto Futures Scalp Pro • Final</title>
   <style>
     :root {
       --bg: #0a0e17;
@@ -13,9 +13,8 @@
       --green: #10b981;
       --red: #ef4444;
       --blue: #3b82f6;
-      --orange: #f59e0b;
+      --yellow: #eab308;
     }
-
     * { box-sizing: border-box; }
     body {
       margin: 0;
@@ -25,27 +24,22 @@
       font-size: 0.94rem;
       line-height: 1.4;
     }
-
     header {
       padding: 14px 16px;
       background: var(--card);
       text-align: center;
       border-bottom: 1px solid #1f2937;
     }
-
     h1 {
       margin: 0;
-      font-size: 1.38rem;
+      font-size: 1.42rem;
       font-weight: 600;
-      letter-spacing: -0.4px;
     }
-
     #status {
       margin-top: 6px;
       font-size: 0.82rem;
       color: var(--muted);
     }
-
     .controls {
       display: flex;
       gap: 10px;
@@ -55,8 +49,7 @@
       background: var(--card);
       border-bottom: 1px solid #1f2937;
     }
-
-    input, button {
+    input, button, select {
       padding: 9px 14px;
       border-radius: 6px;
       font-size: 0.9rem;
@@ -64,21 +57,45 @@
       border: 1px solid #374151;
       color: white;
     }
-
+    select { cursor: pointer; }
     button {
       background: var(--blue);
       border: none;
       cursor: pointer;
       font-weight: 500;
     }
-
     button:hover { opacity: 0.92; }
-
+    .market-trends {
+      padding: 12px 16px;
+      background: var(--card);
+      margin: 12px;
+      border-radius: 8px;
+    }
+    .trend-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #1f2937;
+    }
+    .news-section {
+      padding: 12px 16px;
+      background: var(--card);
+      margin: 12px;
+      border-radius: 8px;
+    }
+    .news-item {
+      padding: 10px;
+      border-bottom: 1px solid #1f2937;
+    }
+    .news-item a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+    .news-item a:hover { text-decoration: underline; }
     .table-container {
       padding: 0 12px 24px;
       overflow-x: auto;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
@@ -87,56 +104,48 @@
       overflow: hidden;
       font-size: 0.88rem;
     }
-
     th, td {
       padding: 10px 12px;
       text-align: right;
       border-bottom: 1px solid #1f2937;
     }
-
     th {
       background: #0f172a;
       font-weight: 500;
       color: var(--muted);
       text-transform: uppercase;
       font-size: 0.76rem;
-      letter-spacing: 0.4px;
     }
-
     td:first-child {
       text-align: left;
       font-weight: 500;
     }
-
     tr:hover {
       background: rgba(59, 130, 246, 0.07);
     }
-
     .coin-cell {
       display: flex;
       align-items: center;
       gap: 8px;
     }
-
     .coin-cell img {
       width: 22px;
       height: 22px;
       border-radius: 50%;
       background: #1f2937;
     }
-
-    .strong-buy { background: rgba(16,185,129,0.11); color: var(--green); font-weight: 600; }
-    .buy       { color: var(--green); font-weight: 600; }
-    .sell      { color: var(--red);   font-weight: 600; }
-    .strong-sell { background: rgba(239,68,68,0.11); color: var(--red); font-weight: 600; }
-
+    .strong-buy, .strong-sell {
+      font-weight: 700;
+      background: rgba(16,185,129,0.18);
+    }
+    .strong-sell {
+      background: rgba(239,68,68,0.18);
+    }
     .rr-good   { color: #6ee7b7; }
     .rr-excellent { color: #34d399; font-weight: 600; }
     .rr-warning { color: #fbbf24; }
-
-    .tf-short  { color: #a5b4fc; }
-    .tf-swing  { color: #c084fc; }
-
+    .sentiment-bullish { color: var(--green); font-weight: 500; }
+    .sentiment-bearish { color: var(--red);   font-weight: 500; }
     @media (max-width: 768px) {
       .controls { flex-direction: column; align-items: stretch; }
       th, td { padding: 9px 8px; font-size: 0.82rem; }
@@ -146,173 +155,304 @@
 <body>
 
 <header>
-  <h1>Crypto Signals • Real-Time</h1>
-  <div id="status">Loading from multiple free APIs...</div>
+  <h1>Futures Scalp Pro • Final Version</h1>
+  <div id="status">Loading strong signals...</div>
 </header>
 
 <div class="controls">
-  <input type="text" id="search" placeholder="Search coin or symbol…">
-  <button id="refresh">↻ Refresh Now</button>
+  <select id="exchange">
+    <option value="binance">Binance Futures</option>
+    <option value="bybit">Bybit</option>
+    <option value="okx">OKX</option>
+    <option value="mexc">MEXC Futures</option>
+  </select>
+  <input type="text" id="search" placeholder="Search symbol (BTCUSDT, BTC_USDT…)">
+  <button id="refresh">↻ Refresh</button>
+</div>
+
+<div class="market-trends">
+  <h2 style="font-size:1.1rem; margin:0 0 8px;">Market Overview</h2>
+  <div id="trends"></div>
 </div>
 
 <div class="table-container">
   <table id="table">
     <thead>
       <tr>
-        <th>Coin</th>
+        <th>Symbol</th>
         <th>Price</th>
-        <th>24h</th>
-        <th>Vol/MCap</th>
+        <th>1h %</th>
+        <th>Vol 24h</th>
+        <th>RSI</th>
+        <th>ATR</th>
         <th>Signal</th>
         <th>Entry</th>
         <th>TP1</th>
         <th>TP2</th>
         <th>SL</th>
         <th>R:R</th>
-        <th>Timeframe</th>
+        <th>Sentiment</th>
       </tr>
     </thead>
     <tbody id="tbody"></tbody>
   </table>
 </div>
 
+<div class="news-section">
+  <h2 style="font-size:1.1rem; margin:0 0 8px;">Latest Crypto News</h2>
+  <div id="news"></div>
+</div>
+
 <script>
-const APIs = [
-  { name: 'CoinGecko', url: 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h' },
-  { name: 'CoinCap',   url: 'https://api.coincap.io/v2/assets?limit=100' },
-  { name: 'CoinPaprika', url: 'https://api.coinpaprika.com/v1/tickers?quotes=USD' }
-];
-
-const REFRESH_SEC = 60; // more real-time feel with free limits
-
-async function fetchWithFallback() {
-  for (const api of APIs) {
-    try {
-      const res = await fetch(api.url, { cache: 'no-cache' });
-      if (!res.ok) continue;
-      const data = await res.json();
-      if (api.name === 'CoinGecko') return { source: api.name, coins: data };
-      if (api.name === 'CoinCap') {
-        return { source: api.name, coins: data.data.map(a => ({
-          id: a.id,
-          symbol: a.symbol,
-          name: a.name,
-          image: `https://assets.coincap.io/assets/icons/${a.symbol.toLowerCase()}@2x.png`,
-          current_price: parseFloat(a.priceUsd),
-          price_change_percentage_24h: parseFloat(a.changePercent24Hr),
-          total_volume: parseFloat(a.volumeUsd24Hr),
-          market_cap: parseFloat(a.marketCapUsd)
-        })) };
-      }
-      if (api.name === 'CoinPaprika') {
-        return { source: api.name, coins: Object.values(data).map(t => ({
-          id: t.id,
-          symbol: t.symbol,
-          name: t.name,
-          image: `https://coinpaprika.com/coin/${t.id}/logo.png`, // approx
-          current_price: t.quotes.USD.price,
-          price_change_percentage_24h: t.quotes.USD.percent_change_24h,
-          total_volume: t.quotes.USD.volume_24h,
-          market_cap: t.quotes.USD.market_cap
-        })) };
-      }
-    } catch (e) {}
+const EXCHANGES = {
+  binance: {
+    tickerUrl: 'https://fapi.binance.com/fapi/v1/ticker/24hr',
+    klinesUrl: sym => `https://fapi.binance.com/fapi/v1/klines?symbol=${sym}&interval=1m&limit=60`,
+    parse: t => ({
+      symbol: t.symbol,
+      price: parseFloat(t.lastPrice),
+      ch1h: parseFloat(t.priceChangePercent)/24 || 0,
+      ch24: parseFloat(t.priceChangePercent) || 0,
+      volume: parseFloat(t.quoteVolume) || 0
+    }),
+    filter: t => t.symbol.endsWith('USDT') && !t.symbol.includes('_')
+  },
+  bybit: {
+    tickerUrl: 'https://api.bybit.com/v5/market/tickers?category=linear',
+    klinesUrl: sym => `https://api.bybit.com/v5/market/kline?category=linear&symbol=${sym}&interval=1&limit=60`,
+    parse: t => ({
+      symbol: t.symbol,
+      price: parseFloat(t.lastPrice),
+      ch1h: parseFloat(t.price1hPcnt || 0),
+      ch24: parseFloat(t.price24hPcnt || 0),
+      volume: parseFloat(t.volume24h || 0)
+    }),
+    filter: () => true
+  },
+  okx: {
+    tickerUrl: 'https://www.okx.com/api/v5/market/tickers?instType=SWAP',
+    klinesUrl: sym => `https://www.okx.com/api/v5/market/candles?instId=${sym}&bar=1m&limit=60`,
+    parse: t => ({
+      symbol: t.instId.replace('-',''),
+      price: parseFloat(t.last),
+      ch1h: parseFloat(t.c24h)/24 || 0,
+      ch24: parseFloat(t.c24h || 0),
+      volume: parseFloat(t.volCcy24h || 0)
+    }),
+    filter: t => t.instId.endsWith('-USDT-SWAP')
+  },
+  mexc: {
+    tickerUrl: 'https://contract.mexc.com/api/v1/contract/ticker',
+    klinesUrl: sym => `https://contract.mexc.com/api/v1/contract/kline/${sym}?interval=Min1&limit=60`,
+    parse: t => ({
+      symbol: t.symbol,
+      price: parseFloat(t.lastPrice),
+      ch1h: 0,
+      ch24: parseFloat(t.r24) || 0,
+      volume: parseFloat(t.volValue24) || 0
+    }),
+    filter: t => t.symbol.endsWith('_USDT')
   }
-  throw new Error('All free APIs failed');
+};
+
+function getLogoUrl(symbol) {
+  const base = symbol.replace(/_?USDT$/, '').toLowerCase();
+  const known = {
+    'btc': 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
+    'eth': 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
+    'sol': 'https://assets.coingecko.com/coins/images/4128/small/solana.png',
+    'bnb': 'https://assets.coingecko.com/coins/images/825/small/bnb-icon2_2x.png',
+    'xrp': 'https://assets.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png',
+    'ada': 'https://assets.coingecko.com/coins/images/975/small/cardano.png',
+    'doge': 'https://assets.coingecko.com/coins/images/5/small/dogecoin.png',
+    'avax': 'https://assets.coingecko.com/coins/images/12559/small/Avalanche_horizontal_Red.png',
+    'link': 'https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png',
+    'dot': 'https://assets.coingecko.com/coins/images/12171/small/polkadot.png'
+  };
+  return known[base] || `https://via.placeholder.com/22?text=${base.slice(0,3).toUpperCase()}`;
+}
+
+const REFRESH_SEC = 30;
+const NEWS_API = 'https://api.coingecko.com/api/v3/news';
+const FNG_API = 'https://api.alternative.me/fng/?limit=1';
+
+function calculateRSI(closes, period = 14) {
+  if (closes.length < period + 1) return 50;
+  let gains = 0, losses = 0;
+  for (let i = 1; i <= period; i++) {
+    const diff = closes[i] - closes[i-1];
+    if (diff > 0) gains += diff; else losses -= diff;
+  }
+  let avgG = gains / period;
+  let avgL = losses / period || 0.0001;
+  return 100 - (100 / (1 + avgG / avgL));
+}
+
+function calculateMACD(closes) {
+  function ema(arr, p) {
+    const k = 2 / (p + 1);
+    let em = arr[0];
+    for (let i = 1; i < arr.length; i++) em = arr[i] * k + em * (1 - k);
+    return em;
+  }
+  const ema12 = ema(closes.slice(-26), 12);
+  const ema26 = ema(closes.slice(-26), 26);
+  return ema12 - ema26;
+}
+
+function calculateATR(klines, period = 14) {
+  if (klines.length < period + 1) return 0;
+  let trs = [];
+  for (let i = 1; i < klines.length; i++) {
+    const h = klines[i].high || klines[i][2];
+    const l = klines[i].low  || klines[i][3];
+    const pc = klines[i-1].close || klines[i-1][4];
+    trs.push(Math.max(h - l, Math.abs(h - pc), Math.abs(l - pc)));
+  }
+  return trs.slice(-period).reduce((a,b)=>a+b,0) / period;
+}
+
+async function loadFNG() {
+  try {
+    const r = await fetch(FNG_API);
+    const d = await r.json();
+    const f = d.data[0];
+    document.getElementById('trends').innerHTML = `
+      <div class="trend-item"><span>Fear & Greed</span><span style="color:${f.value<40?'var(--red)':f.value>60?'var(--green)':'var(--yellow)'}">${f.value} (${f.value_classification})</span></div>
+      <div class="trend-item"><span>Trend</span><span>${f.value>60?'Uptrend':f.value<40?'Downtrend':'Neutral'}</span></div>
+    `;
+  } catch {}
+}
+
+async function loadNews() {
+  try {
+    const r = await fetch(NEWS_API);
+    const d = await r.json();
+    const nd = document.getElementById('news');
+    nd.innerHTML = '';
+    d.data.slice(0,5).forEach(n => {
+      const div = document.createElement('div');
+      div.className = 'news-item';
+      div.innerHTML = `<a href="${n.url}" target="_blank">${n.title}</a><p style="font-size:0.8rem;color:var(--muted);margin:4px 0;">${n.description?.slice(0,100)||''}...</p>`;
+      nd.appendChild(div);
+    });
+  } catch {}
 }
 
 async function loadData() {
+  const ex = document.getElementById('exchange').value;
+  const cfg = EXCHANGES[ex];
   const status = document.getElementById('status');
-  status.textContent = `Fetching (${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'})})…`;
+  status.textContent = `Loading ${ex} futures (${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})})…`;
+
+  loadFNG();
+  loadNews();
 
   try {
-    const { source, coins } = await fetchWithFallback();
-    status.textContent = `From ${source} • ${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})} • every ${REFRESH_SEC}s`;
+    const r = await fetch(cfg.tickerUrl);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    let tickers = (data.result || data.data || data).filter(cfg.filter || (()=>true));
+
+    tickers.sort((a,b) => (cfg.parse(b).volume || 0) - (cfg.parse(a).volume || 0));
+    const top = tickers.slice(0,60);
 
     const tbody = document.getElementById('tbody');
     tbody.innerHTML = '';
 
-    coins.forEach(c => {
-      const price    = c.current_price || 0;
-      const ch24     = c.price_change_percentage_24h || 0;
-      const volume   = c.total_volume || 0;
-      const mcap     = c.market_cap || 1;
-      const volRatio = mcap > 0 ? volume / mcap : 0;
+    for (const t of top) {
+      const item = cfg.parse(t);
+      item.image = getLogoUrl(item.symbol);
 
-      let signal = 'NEUTRAL';
-      let cls = '';
-      let timeframe = '';
-      let tfClass = '';
+      const kr = await fetch(cfg.klinesUrl(item.symbol));
+      if (!kr.ok) continue;
+      const kd = await kr.json();
+      const klines = (kd.data || kd.result || kd).map(k => ({
+        time: k[0], open: parseFloat(k[1]), high: parseFloat(k[2]),
+        low: parseFloat(k[3]), close: parseFloat(k[4])
+      }));
 
-      if (ch24 > 9.5 && volRatio > 3.2) {
+      const closes = klines.map(k => k.close);
+      const rsi = calculateRSI(closes);
+      const macd = calculateMACD(closes);
+      const atr = calculateATR(klines);
+      const ch5m = closes.length >=6 ? (closes[closes.length-1] - closes[closes.length-6]) / closes[closes.length-6] * 100 : 0;
+
+      let signal = 'NEUTRAL', cls = '';
+      if (ch5m > 0.45 && rsi < 65 && macd > 0 && item.volume > 1.2e8) {
         signal = 'STRONG BUY'; cls = 'strong-buy';
-        timeframe = 'Short / Swing'; tfClass = 'tf-swing';
-      } else if (ch24 > 4.8 && volRatio > 1.7) {
-        signal = 'BUY'; cls = 'buy';
-        timeframe = 'Short-term'; tfClass = 'tf-short';
-      } else if (ch24 < -9.5 && volRatio > 3.2) {
+      } else if (ch5m < -0.45 && rsi > 35 && macd < 0 && item.volume > 1.2e8) {
         signal = 'STRONG SELL'; cls = 'strong-sell';
-        timeframe = 'Short / Swing'; tfClass = 'tf-swing';
-      } else if (ch24 < -4.8 && volRatio > 1.7) {
-        signal = 'SELL'; cls = 'sell';
-        timeframe = 'Short-term'; tfClass = 'tf-short';
       }
 
-      if (signal === 'NEUTRAL') return;
+      if (signal === 'NEUTRAL') continue;
 
-      const entry = price;
-      const tp1   = entry * 1.068;
-      const tp2   = entry * 1.152;
-      const sl    = entry * 0.956;
+      const entry = item.price;
+      const isLong = signal.includes('BUY');
+      const atrSL  = 1.6 * atr;
+      const atrTP1 = 2.3 * atr;
+      const atrTP2 = 4.5 * atr;
 
-      const risk   = entry - sl;
-      const reward = tp2 - entry;
-      const rr     = reward / risk;
+      let sl, tp1, tp2;
+      if (isLong) {
+        sl  = entry - atrSL;
+        tp1 = entry + atrTP1;
+        tp2 = entry + atrTP2;
+      } else {
+        sl  = entry + atrSL;
+        tp1 = entry - atrTP1;
+        tp2 = entry - atrTP2;
+      }
 
-      let rrText = rr.toFixed(1);
-      let rrClass = 'rr-good';
-      if (rr >= 3.2) rrClass = 'rr-excellent';
-      else if (rr < 1.8) rrClass = 'rr-warning';
+      const risk = Math.abs(entry - sl);
+      const reward = Math.abs(tp2 - entry);
+      const rr = risk > 0 ? reward / risk : 0;
+
+      let rrCls = 'rr-good', rrTxt = rr.toFixed(1);
+      if (rr >= 2.8) rrCls = 'rr-excellent';
+      else if (rr < 1.8) rrCls = 'rr-warning';
+
+      const sentCls = isLong ? 'sentiment-bullish' : 'sentiment-bearish';
+      const sentTxt = isLong ? 'Bullish' : 'Bearish';
 
       const tr = document.createElement('tr');
       tr.className = cls;
       tr.innerHTML = `
         <td class="coin-cell">
-          <img src="${c.image || 'https://via.placeholder.com/22'}" alt loading="lazy" onerror="this.src='https://via.placeholder.com/22'">
-          <div>
-            ${c.name}<br>
-            <small style="color:var(--muted);">${c.symbol.toUpperCase()}</small>
-          </div>
+          <img src="${item.image}" alt onerror="this.src='https://via.placeholder.com/22'" loading="lazy">
+          <div>${item.symbol}</div>
         </td>
-        <td>$${price.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:6})}</td>
-        <td>${ch24.toFixed(2)}%</td>
-        <td>${(volRatio).toFixed(2)}×</td>
+        <td>$${entry.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:6})}</td>
+        <td>${item.ch1h.toFixed(2)}%</td>
+        <td>$${Math.round(item.volume/1e6)}M</td>
+        <td>${rsi.toFixed(1)}</td>
+        <td>${atr.toFixed(4)}</td>
         <td class="${cls}">${signal}</td>
-        <td>$${entry.toFixed(6)}</td>
-        <td class="rr-good">$${tp1.toFixed(6)}</td>
-        <td class="rr-excellent">$${tp2.toFixed(6)}</td>
-        <td style="color:var(--red);">$${sl.toFixed(6)}</td>
-        <td class="${rrClass}">${rrText}:1</td>
-        <td class="${tfClass}">${timeframe}</td>
+        <td>$${entry.toFixed(4)}</td>
+        <td class="rr-good">$${tp1.toFixed(4)}</td>
+        <td class="rr-excellent">$${tp2.toFixed(4)}</td>
+        <td style="color:var(--red);">$${sl.toFixed(4)}</td>
+        <td class="${rrCls}">${rrTxt}:1</td>
+        <td class="${sentCls}">${sentTxt}</td>
       `;
       tbody.appendChild(tr);
-    });
+    }
 
-  } catch (err) {
-    console.error(err);
-    status.textContent = 'All free sources failed – try again later';
+    status.textContent = `Showing STRONG signals only • ${ex.toUpperCase()} • ${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} • auto ${REFRESH_SEC}s`;
+  } catch (e) {
+    status.textContent = `Error: ${e.message} – try another exchange or refresh`;
+    console.error(e);
   }
 }
 
-// Search filter
+document.getElementById('exchange').onchange = loadData;
+document.getElementById('refresh').onclick = loadData;
 document.getElementById('search').oninput = e => {
   const term = e.target.value.trim().toLowerCase();
-  document.querySelectorAll('#tbody tr').forEach(row => {
-    row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+  document.querySelectorAll('#tbody tr').forEach(r => {
+    r.style.display = r.textContent.toLowerCase().includes(term) ? '' : 'none';
   });
 };
-
-document.getElementById('refresh').onclick = loadData;
 
 window.onload = loadData;
 setInterval(loadData, REFRESH_SEC * 1000);
